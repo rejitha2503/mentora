@@ -1,15 +1,13 @@
+# pyrefly: ignore [missing-import]
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 import os
 from dotenv import load_dotenv
 
-from mangum import Mangum
-
 load_dotenv()
 
 app = FastAPI(title="Mentora API", description="Backend for Mentora AI Career Assistant")
-handler = Mangum(app)
 
 # CORS configuration
 app.add_middleware(
