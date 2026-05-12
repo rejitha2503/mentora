@@ -1,0 +1,11 @@
+[build]
+  command = "pip install -r requirements.txt"
+  functions = "functions"
+
+[functions]
+  included_files = ["*.py", ".env"]
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/main"
+  status = 200

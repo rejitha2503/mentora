@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+python-dotenv
+supabase
+pydantic
+python-multipart
+openai
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+pytest
+httpx
+cors
+mangum
