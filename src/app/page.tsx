@@ -66,7 +66,7 @@ export default function LandingPage() {
             />
           </div>
           <button 
-            onClick={signInWithGoogle}
+            onClick={() => router.push('/login')}
             className="w-full sm:w-auto bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-medium px-8 py-4 rounded-xl shadow-lg shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5 whitespace-nowrap"
           >
             Generate My AI Roadmap →

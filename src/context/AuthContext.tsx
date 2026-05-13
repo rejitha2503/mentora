@@ -8,6 +8,7 @@ interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password?: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateXP: (amount: number) => void;
   loginAsDemo: () => void;
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   signInWithGoogle: async () => {},
+  signInWithEmail: async () => {},
   signOut: async () => {},
   updateXP: () => {},
   loginAsDemo: () => {},
@@ -109,6 +111,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  async function signInWithEmail(email: string, password?: string) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) {
+      loginAsDemo();
+      return;
+    }
+
+    try {
+      // Basic login (you could expand this for actual signup/login split if needed)
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password: password || 'defaultpassword123',
+      });
+      
+      if (error) {
+        toast.error(`Login Failed: ${error.message}`);
+        // If they don't exist, we could auto-signup, but for safety let's just log
+      }
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to login with email');
+    }
+  }
+
   function loginAsDemo() {
     setUser(DEMO_USER);
     localStorage.setItem('mentora-demo-user', 'true');
@@ -140,7 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, updateXP, loginAsDemo }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithEmail, signOut, updateXP, loginAsDemo }}>
       {children}
     </AuthContext.Provider>
   );
