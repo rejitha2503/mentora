@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase, UserProfile } from '@/lib/supabase';
+import { toast } from 'react-hot-toast';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -94,12 +95,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/dashboard`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       },
     });
     if (error) {
       console.error('Auth error:', error);
+      toast.error(`Login Failed: ${error.message}`);
       // Fallback to demo mode on error to let user see the app
-      loginAsDemo();
+      // loginAsDemo();
     }
   }
 
