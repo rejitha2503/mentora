@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/.netlify/functions/main';
 
 export async function apiRequest(endpoint: string, method: string = 'GET', body?: any) {
   const options: RequestInit = {
@@ -29,7 +29,7 @@ export const careerApi = {
   getRoadmap: (userId: string) => apiRequest(`/roadmap/${userId}`),
   getTasks: (userId: string) => apiRequest(`/tasks/${userId}`),
   completeTask: (taskId: string) => apiRequest(`/tasks/complete/${taskId}`, 'POST'),
-  chat: (message: string, userId: string) => apiRequest('/ai/chat', 'POST', { message, user_id: userId }),
+  chat: (message: string, userId: string, history: any[] = []) => apiRequest('/ai/chat', 'POST', { message, user_id: userId, history }),
   analyzeResume: (content: string) => apiRequest('/resume/analyze', 'POST', { file_content: content }),
   analyzeComms: (audioData: string) => apiRequest('/comms/analyze', 'POST', { audio_data: audioData }),
 };

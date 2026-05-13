@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './Chat.module.css';
 import { useAuth } from '@/context/AuthContext';
-
 import { careerApi } from '@/lib/api';
 
 interface Message {
@@ -13,12 +12,19 @@ interface Message {
 
 export default function ChatPage() {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: `Hello ${user?.full_name.split(' ')[0]}! I'm your Mentora AI Career Assistant. How can I help you today?` }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize with welcome message only once
+  useEffect(() => {
+    if (user && messages.length === 0) {
+      setMessages([
+        { role: 'assistant', content: `Hello ${user.full_name.split(' ')[0]}! I'm your Mentora AI Career Assistant. How can I help you today?` }
+      ]);
+    }
+  }, [user, messages.length]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -33,12 +39,15 @@ export default function ChatPage() {
     if (!input.trim() || isLoading || !user) return;
 
     const userMessage = input.trim();
+    const newMessages: Message[] = [...messages, { role: 'user', content: userMessage }];
+    
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setMessages(newMessages);
     setIsLoading(true);
 
     try {
-      const response = await careerApi.chat(userMessage, user.id);
+      // Send history for context
+      const response = await careerApi.chat(userMessage, user.id, newMessages);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: response.response 

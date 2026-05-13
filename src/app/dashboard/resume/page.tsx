@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './Resume.module.css';
-import { careerApi } from '@/lib/api';
+import { apiRequest } from '@/lib/api';
 
 export default function ResumePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -20,21 +20,22 @@ export default function ResumePage() {
     setIsAnalyzing(true);
     
     try {
-      // In a real app, we'd upload the file to Supabase Storage and send the URL
-      const response = await careerApi.analyzeResume(file.name);
-      
-      setReport({
-        score: response.score,
-        ats_compatibility: response.score > 80 ? 'High' : 'Medium',
-        sections: [
-          { name: 'Keywords', score: 75, feedback: response.feedback[0] },
-          { name: 'Formatting', score: 95, feedback: 'Clean and professional layout.' },
-          { name: 'Impact', score: 80, feedback: response.feedback[1] }
-        ],
-        suggestions: response.feedback
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // We use fetch directly for FormData/File upload
+      const response = await fetch('/.netlify/functions/main/resume/analyze', {
+        method: 'POST',
+        body: formData,
       });
+
+      if (!response.ok) throw new Error('Analysis failed');
+      const data = await response.json();
+      
+      setReport(data);
     } catch (error) {
       console.error('Analysis failed:', error);
+      alert('Failed to analyze resume. Make sure your backend is deployed.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -80,29 +81,43 @@ export default function ResumePage() {
             </div>
             <div className={styles.scoreDetails}>
               <p>ATS Compatibility: <strong>{report.ats_compatibility}</strong></p>
-              <p>Rank: <strong>Top 15%</strong> of applicants</p>
+              <p>Status: <strong>Analysis Complete</strong></p>
             </div>
           </div>
 
           <div className={styles.analysisGrid}>
-            {report.sections.map((s: any) => (
-              <div key={s.name} className={styles.analysisCard}>
-                <div className={styles.cardHeader}>
-                  <h4>{s.name}</h4>
-                  <span className={styles.miniScore}>{s.score}%</span>
-                </div>
-                <div className={styles.progressBar}>
-                  <div className={styles.progressFill} style={{ width: `${s.score}%` }} />
-                </div>
-                <p className={styles.feedback}>{s.feedback}</p>
+            <div className={styles.analysisCard}>
+              <div className={styles.cardHeader}>
+                <h4>✅ Strengths</h4>
               </div>
-            ))}
+              <ul className={styles.feedbackList}>
+                {report.strengths?.map((s: string, i: number) => <li key={i}>{s}</li>)}
+              </ul>
+            </div>
+            <div className={styles.analysisCard}>
+              <div className={styles.cardHeader}>
+                <h4>⚠️ Weaknesses</h4>
+              </div>
+              <ul className={styles.feedbackList}>
+                {report.weaknesses?.map((s: string, i: number) => <li key={i}>{s}</li>)}
+              </ul>
+            </div>
+            <div className={styles.analysisCard}>
+              <div className={styles.cardHeader}>
+                <h4>🛠️ Missing Skills</h4>
+              </div>
+              <div className={styles.skillsTags}>
+                {report.missing_skills?.map((s: string, i: number) => (
+                  <span key={i} className={styles.skillTag}>{s}</span>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className={styles.suggestionsCard}>
-            <h3>Key Improvements</h3>
+            <h3>General Feedback</h3>
             <ul className={styles.suggestionsList}>
-              {report.suggestions.map((s: string, i: number) => (
+              {report.feedback?.map((s: string, i: number) => (
                 <li key={i}>{s}</li>
               ))}
             </ul>

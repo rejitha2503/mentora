@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import styles from './landing.module.css';
 
 export default function LandingPage() {
-  const { user, signInWithGoogle } = useAuth();
+  const { user, signInWithGoogle, loginAsDemo } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -46,7 +46,10 @@ export default function LandingPage() {
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
             <button className="btn-primary" onClick={signInWithGoogle}>
-              Get Started
+              Sign In
+            </button>
+            <button className="btn-secondary" onClick={loginAsDemo}>
+              Demo Mode
             </button>
           </div>
         </div>
@@ -77,8 +80,8 @@ export default function LandingPage() {
               </svg>
               Sign in with Google
             </button>
-            <button className="btn-secondary" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>
-              Explore Features
+            <button className="btn-secondary" onClick={loginAsDemo}>
+              Try Demo Mode
             </button>
           </div>
 
@@ -213,8 +216,8 @@ export default function LandingPage() {
           <p className={styles.ctaSubtitle}>
             Join thousands of students who are already leveling up with Mentora
           </p>
-          <button className="btn-primary" onClick={signInWithGoogle} style={{ fontSize: 18, padding: '16px 40px' }}>
-            Start Your Journey — It&apos;s Free
+          <button className="btn-primary" onClick={loginAsDemo} style={{ fontSize: 18, padding: '16px 40px' }}>
+            Start Your Journey — Try Demo
           </button>
         </div>
       </section>

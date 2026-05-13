@@ -9,6 +9,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   updateXP: (amount: number) => void;
+  loginAsDemo: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   signInWithGoogle: async () => {},
   signOut: async () => {},
   updateXP: () => {},
+  loginAsDemo: () => {},
 });
 
 // Demo user for development
@@ -83,9 +85,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function signInWithGoogle() {
     // If Supabase is not configured, use demo mode
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      setUser(DEMO_USER);
-      localStorage.setItem('mentora-demo-user', 'true');
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')) {
+      loginAsDemo();
       return;
     }
 
@@ -95,7 +96,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         redirectTo: `${window.location.origin}/dashboard`,
       },
     });
-    if (error) console.error('Auth error:', error);
+    if (error) {
+      console.error('Auth error:', error);
+      // Fallback to demo mode on error to let user see the app
+      loginAsDemo();
+    }
+  }
+
+  function loginAsDemo() {
+    setUser(DEMO_USER);
+    localStorage.setItem('mentora-demo-user', 'true');
   }
 
   async function signOut() {
@@ -124,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, updateXP }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, updateXP, loginAsDemo }}>
       {children}
     </AuthContext.Provider>
   );
